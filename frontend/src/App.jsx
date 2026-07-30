@@ -71,6 +71,16 @@ function App() {
     }
   };
 
+  const handleLogin = (userProfile) => {
+    setUser(userProfile);
+    fetchData();
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    fetchData();
+  };
+
   // Poll for real-time telemetry updates every 3 seconds
   useEffect(() => {
     fetchData(); // initial fetch
@@ -88,6 +98,7 @@ function App() {
     } else {
       setSelectedAssetId(null);
     }
+    fetchData();
   };
 
   const renderActivePage = () => {
@@ -130,6 +141,7 @@ function App() {
             operators={operators} 
             fetchData={fetchData}
             initialAssetId={selectedAssetId}
+            clearParentAssetId={() => setSelectedAssetId(null)}
           />
         );
       case 'analytics':
@@ -161,7 +173,7 @@ function App() {
   };
 
   if (!user) {
-    return <Login onLogin={setUser} operators={operators} equipment={equipment} />;
+    return <Login onLogin={handleLogin} operators={operators} equipment={equipment} />;
   }
 
   if (user.role === 'operator') {
@@ -171,7 +183,7 @@ function App() {
         equipment={equipment} 
         sites={sites} 
         fetchData={fetchData} 
-        onLogout={() => setUser(null)} 
+        onLogout={handleLogout} 
       />
     );
   }
@@ -311,7 +323,7 @@ function App() {
           </div>
 
           <button 
-            onClick={() => setUser(null)}
+            onClick={handleLogout}
             className="w-full mt-1 bg-cat-dark hover:bg-cat-border border border-cat-border text-cat-gray hover:text-cat-text py-2 rounded-lg text-[10px] font-bold uppercase transition-all duration-150 flex items-center justify-center gap-1.5"
           >
             <LogOut size={12} />

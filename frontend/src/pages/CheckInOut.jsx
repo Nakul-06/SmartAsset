@@ -10,7 +10,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 
-export default function CheckInOut({ equipment, sites, operators, fetchData, initialAssetId }) {
+export default function CheckInOut({ equipment, sites, operators, fetchData, initialAssetId, clearParentAssetId }) {
   const [selectedAssetId, setSelectedAssetId] = useState(initialAssetId || '');
   const [actionType, setActionType] = useState('checkout'); // 'checkout' or 'checkin'
   
@@ -90,6 +90,7 @@ export default function CheckInOut({ equipment, sites, operators, fetchData, ini
         setSelectedAssetId('');
         setDestinationSite('');
         setSelectedOperator('');
+        if (clearParentAssetId) clearParentAssetId();
         await fetchData();
       } else {
         alert('Failed to check out equipment.');
@@ -121,6 +122,7 @@ export default function CheckInOut({ equipment, sites, operators, fetchData, ini
           operator: 'Available in local fleet yard.'
         });
         setSelectedAssetId('');
+        if (clearParentAssetId) clearParentAssetId();
         await fetchData();
       } else {
         alert('Failed to check in equipment.');
