@@ -20,6 +20,7 @@ export default function OperatorPortal({ user, equipment, sites, fetchData, onLo
   const [expectedReturn, setExpectedReturn] = useState('2026-08-15');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState(null);
+  const [operatorTab, setOperatorTab] = useState('lease');
 
   // Map refs
   const mapRef = useRef(null);
@@ -149,6 +150,30 @@ export default function OperatorPortal({ user, equipment, sites, fetchData, onLo
         </button>
       </header>
 
+      {/* Tabs Navigation */}
+      <div className="flex bg-cat-card border-b border-cat-border px-6 md:px-12 py-1 gap-4 shrink-0">
+        <button
+          onClick={() => setOperatorTab('lease')}
+          className={`px-4 py-2 text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${
+            operatorTab === 'lease'
+              ? 'border-cat-yellow text-cat-yellow'
+              : 'border-transparent text-cat-gray hover:text-cat-text'
+          }`}
+        >
+          {myAsset ? 'My Active Lease' : 'Deploy Equipment'}
+        </button>
+        <button
+          onClick={() => setOperatorTab('gallery')}
+          className={`px-4 py-2 text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${
+            operatorTab === 'gallery'
+              ? 'border-cat-yellow text-cat-yellow'
+              : 'border-transparent text-cat-gray hover:text-cat-text'
+          }`}
+        >
+          Available Fleet ({equipment.filter(e => e.status === 'Unassigned').length})
+        </button>
+      </div>
+
       {/* 2. SUB-PORTAL MAIN CONTAINER */}
       <main className="flex-1 max-w-6xl w-full mx-auto p-6 md:p-10 overflow-y-auto">
         {successMsg && (
@@ -161,7 +186,84 @@ export default function OperatorPortal({ user, equipment, sites, fetchData, onLo
           </div>
         )}
 
-        {myAsset ? (
+        {operatorTab === 'gallery' ? (
+          /* AVAILABLE FLEET GALLERY */
+          <div className="space-y-6">
+            <div className="space-y-1">
+              <h3 className="text-lg font-extrabold text-cat-text uppercase">Available Fleet Gallery</h3>
+              <p className="text-xs text-cat-gray">Browse unassigned heavy equipment in the yard ready for lease deployment.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">
+              {equipment.filter(e => e.status === 'Unassigned').length > 0 ? (
+                equipment
+                  .filter(e => e.status === 'Unassigned')
+                  .map(asset => {
+                    let MachineIcon = HardHat;
+                    if (asset.type === 'Excavator') MachineIcon = Truck;
+                    if (asset.type === 'Crane') MachineIcon = Activity;
+                    if (asset.type === 'Bulldozer') MachineIcon = HardHat;
+
+                    return (
+                      <div key={asset.equipmentId} className="bg-cat-card border border-cat-border p-5 rounded-xl space-y-4 flex flex-col justify-between hover:border-cat-yellow/60 transition-colors">
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <span className="text-[10px] bg-cat-dark border border-cat-border px-2.5 py-0.5 rounded-full text-cat-gray font-bold uppercase tracking-wider">
+                                {asset.type}
+                              </span>
+                              <h4 className="font-extrabold text-cat-text mt-1.5 text-sm">{asset.name}</h4>
+                              <p className="text-[10px] text-cat-gray font-bold uppercase">{asset.equipmentId}</p>
+                            </div>
+                            <div className="p-2 bg-cat-dark border border-cat-border rounded-lg text-cat-yellow">
+                              <MachineIcon size={16} />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2 pt-2 text-xs">
+                            <div className="flex justify-between text-cat-gray">
+                              <span>Fuel Level</span>
+                              <span className="font-bold text-cat-text">{Math.round(asset.fuelLevel)}%</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-cat-dark rounded-full overflow-hidden border border-cat-border">
+                              <div style={{ width: `${asset.fuelLevel}%` }} className="h-full bg-amber-500" />
+                            </div>
+                          </div>
+
+                          <div className="pt-2 text-[10px] text-cat-gray border-t border-cat-border/60 flex justify-between">
+                            <span>Status: READY</span>
+                            <span>Yard Chennai</span>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            if (myAsset) {
+                              alert(`Active lease exists: You are currently operating ${myAsset.equipmentId}. Please return it before deploying another machine.`);
+                              return;
+                            }
+                            setSelectedAssetId(asset.equipmentId);
+                            setOperatorTab('lease');
+                          }}
+                          className={`w-full py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors ${
+                            myAsset 
+                              ? 'bg-cat-dark border border-cat-border text-cat-gray cursor-not-allowed' 
+                              : 'bg-cat-yellow hover:bg-yellow-500 text-cat-dark'
+                          }`}
+                        >
+                          {myAsset ? 'Lease Locked' : 'Deploy Machine'}
+                        </button>
+                      </div>
+                    );
+                  })
+              ) : (
+                <div className="col-span-full bg-cat-card border border-cat-border p-10 rounded-xl text-center text-cat-gray text-xs">
+                  No unassigned machinery currently available in the fleet yard.
+                </div>
+              )}
+            </div>
+          </div>
+        ) : myAsset ? (
           /* ACTIVE EQUIPMENT VIEW */
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
@@ -193,9 +295,11 @@ export default function OperatorPortal({ user, equipment, sites, fetchData, onLo
               <div className="bg-cat-card border border-cat-border p-6 rounded-xl space-y-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="text-[10px] uppercase font-bold tracking-widest text-cat-yellow">{myAsset.type} ASSIGNED</span>
-                    <h2 className="text-xl font-extrabold text-cat-text mt-0.5">{myAsset.name}</h2>
-                    <p className="font-bold text-cat-yellow text-xs mt-0.5">{myAsset.equipmentId}</p>
+                    <span className="text-[10px] bg-cat-dark border border-cat-border px-2.5 py-0.5 rounded-full text-cat-gray font-bold uppercase tracking-wider">
+                      {myAsset.type}
+                    </span>
+                    <h3 className="text-xl font-extrabold text-cat-text mt-2 uppercase">{myAsset.name}</h3>
+                    <p className="text-xs text-cat-gray font-bold uppercase">{myAsset.equipmentId}</p>
                   </div>
 
                   <span className="bg-emerald-950 text-emerald-400 border border-emerald-900 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
@@ -318,7 +422,7 @@ export default function OperatorPortal({ user, equipment, sites, fetchData, onLo
           </div>
         ) : (
           /* NO ASSIGNED EQUIPMENT: Request Checkout Form */
-          <div className="max-w-xl mx-auto bg-cat-card border border-cat-border p-8 rounded-2xl space-y-6">
+          <div className="max-w-xl mx-auto bg-cat-card border border-cat-border p-8 rounded-2xl space-y-6 animate-fadeIn">
             <div className="text-center space-y-2 border-b border-cat-border pb-5">
               <div className="w-12 h-12 bg-cat-yellow/10 border border-cat-yellow/20 rounded-full flex items-center justify-center mx-auto text-cat-yellow">
                 <QrCode size={24} />
