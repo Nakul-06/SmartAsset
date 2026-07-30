@@ -1,29 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Shield, User, HardHat, Key } from 'lucide-react';
 
-export default function Login({ onLogin }) {
+export default function Login({ onLogin, operators = [], equipment = [] }) {
   const [selectedRole, setSelectedRole] = useState('admin');
-  const [selectedOperatorId, setSelectedOperatorId] = useState('OP101');
+  const [selectedOperatorId, setSelectedOperatorId] = useState('');
 
-  // Hardcoded operator profiles for demo convenience
-  const operators = [
-    { id: 'OP101', name: 'John Doe', cert: 'Excavator Level 2', note: 'Assigned to EQX1001 (Active, Low Util)' },
-    { id: 'OP203', name: 'Alex Carter', cert: 'Bulldozer Specialist', note: 'Assigned to EQX1003 (Active, High Util)' },
-    { id: 'OP103', name: 'Mike Ross', cert: 'Bulldozer Specialist', note: 'Assigned to EQX1006 (Overdue)' },
-    { id: 'OP102', name: 'Sarah Connor', cert: 'Crane Master', note: 'No active machine (Request portal)' }
-  ];
+  // Sort operators so that special demo profiles are at the top of the dropdown
+  const sortedOperators = [...operators].sort((a, b) => {
+    const primaryIds = ['OP101', 'OP203', 'OP103', 'OP102'];
+    const aIdx = primaryIds.indexOf(a.id);
+    const bIdx = primaryIds.indexOf(b.id);
+    
+    if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+    if (aIdx !== -1) return -1;
+    if (bIdx !== -1) return 1;
+    return a.id.localeCompare(b.id);
+  });
+
+  // Set default selection when operators list loads
+  useEffect(() => {
+    if (sortedOperators.length > 0 && !selectedOperatorId) {
+      setSelectedOperatorId(sortedOperators[0].id);
+    }
+  }, [sortedOperators, selectedOperatorId]);
+
+  // Find selected operator metadata
+  const currentOp = sortedOperators.find(o => o.id === selectedOperatorId);
+
+  // Determine dynamic asset assignment description
+  const myAsset = currentOp 
+    ? equipment.find(e => e.operatorId === currentOp.id && e.status === 'Active') 
+    : null;
+
+  const isOverdue = myAsset?.status === 'Active' && 
+                    myAsset?.checkOutDate && 
+                    new Date(myAsset.checkOutDate) < new Date('2026-07-30');
+
+  let opNote = 'No active machine (Request portal)';
+  if (myAsset) {
+    if (isOverdue) {
+      opNote = `Assigned to ${myAsset.equipmentId} (${myAsset.name}) — OVERDUE`;
+    } else {
+      opNote = `Assigned to ${myAsset.equipmentId} (${myAsset.name}) — Active, ${myAsset.utilization}% Util`;
+    }
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (selectedRole === 'admin') {
       onLogin({ role: 'admin', name: 'Fleet Supervisor' });
-    } else {
-      const op = operators.find(o => o.id === selectedOperatorId);
+    } else if (currentOp) {
       onLogin({ 
         role: 'operator', 
-        id: op.id, 
-        name: op.name, 
-        cert: op.cert 
+        id: currentOp.id, 
+        name: currentOp.name, 
+        cert: currentOp.certification || 'General Heavy Equipment' 
       });
     }
   };
@@ -34,7 +65,6 @@ export default function Login({ onLogin }) {
         
         {/* LEFT PANEL: Brand Info */}
         <div className="flex-1 bg-gradient-to-br from-cat-yellow to-yellow-600 p-10 flex flex-col justify-between text-cat-dark relative">
-          {/* Top decoration logo */}
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-cat-dark flex items-center justify-center font-black text-cat-yellow text-xl">
               CAT
@@ -120,31 +150,38 @@ export default function Login({ onLogin }) {
                     onChange={(e) => setSelectedOperatorId(e.target.value)}
                     className="w-full bg-cat-dark border border-cat-border rounded-lg pl-9 pr-4 py-3 text-xs text-cat-text focus:outline-none focus:border-cat-yellow cursor-pointer"
                   >
-                    {operators.map(op => (
-                      <option key={op.id} value={op.id}>
-                        {op.name} ({op.id}) - {op.cert}
-                      </option>
-                    ))}
+                    {sortedOperators.length > 0 ? (
+                      sortedOperators.map(op => {
+                        const isPrimary = ['OP101', 'OP203', 'OP103', 'OP102'].includes(op.id);
+                        return (
+                          <option key={op.id} value={op.id}>
+                            {isPrimary ? '⭐ ' : ''}{op.name} ({op.id}) - {op.certification || 'Heavy Operator'}
+                          </option>
+                        );
+                      })
+                    ) : (
+                      <option value="">No operators loaded</option>
+                    )}
                   </select>
                 </div>
 
                 {/* Micro helper description */}
-                {(() => {
-                  const currentOp = operators.find(o => o.id === selectedOperatorId);
-                  return currentOp ? (
-                    <div className="bg-cat-dark border border-cat-border p-3.5 rounded-lg text-[10px]">
-                      <span className="text-cat-gray block">Status Profile:</span>
-                      <span className="font-bold text-cat-yellow mt-0.5 block">{currentOp.note}</span>
-                    </div>
-                  ) : null;
-                })()}
+                {currentOp && (
+                  <div className="bg-cat-dark border border-cat-border p-3.5 rounded-lg text-[10px]">
+                    <span className="text-cat-gray block">Status Profile:</span>
+                    <span className={`font-bold mt-0.5 block ${isOverdue ? 'text-red-500' : 'text-cat-yellow'}`}>
+                      {opNote}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
 
             {/* Login Submit Button */}
             <button
               type="submit"
-              className="w-full bg-cat-yellow hover:bg-yellow-500 text-cat-dark font-extrabold py-3.5 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-cat-yellow/10"
+              disabled={selectedRole === 'operator' && !selectedOperatorId}
+              className="w-full bg-cat-yellow hover:bg-yellow-500 disabled:bg-cat-border text-cat-dark font-extrabold py-3.5 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-cat-yellow/10"
             >
               <span>Authenticate and Enter</span>
             </button>

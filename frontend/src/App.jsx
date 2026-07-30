@@ -161,7 +161,7 @@ function App() {
   };
 
   if (!user) {
-    return <Login onLogin={setUser} />;
+    return <Login onLogin={setUser} operators={operators} equipment={equipment} />;
   }
 
   if (user.role === 'operator') {
