@@ -23,7 +23,7 @@ import AIInsights from './pages/AIInsights';
 import OperatorPortal from './pages/OperatorPortal';
 import Login from './components/Login';
 
-const BACKEND_URL = 'http://localhost:5001/api';
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');

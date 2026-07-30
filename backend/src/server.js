@@ -359,19 +359,24 @@ app.post('/api/forecast', async (req, res) => {
       h => h.siteId === siteId && h.equipmentType === equipmentType
     );
     const postData = JSON.stringify({ siteId, equipmentType, history });
+    
+    const mlUrlStr = process.env.ML_SERVICE_URL || 'http://localhost:5000/predict';
+    const mlUrl = new URL(mlUrlStr);
+    
     const options = {
-      hostname: 'localhost',
-      port: 5000,
-      path: '/predict',
+      hostname: mlUrl.hostname,
+      port: mlUrl.port || (mlUrl.protocol === 'https:' ? 443 : 80),
+      path: mlUrl.pathname,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(postData)
       },
-      timeout: 1000 // 1 second timeout
+      timeout: 2000
     };
 
-    const pyReq = http.request(options, (pyRes) => {
+    const requestLib = mlUrl.protocol === 'https:' ? require('https') : http;
+    const pyReq = requestLib.request(options, (pyRes) => {
       let data = '';
       pyRes.on('data', (chunk) => { data += chunk; });
       pyRes.on('end', () => {
