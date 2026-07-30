@@ -124,6 +124,10 @@ const getSeedData = () => {
   };
 
   let idCounter = 1008;
+  let operatorCounter = 300;
+  const firstNames = ['David', 'James', 'Robert', 'Michael', 'William', 'Thomas', 'Richard', 'Joseph', 'Charles', 'Daniel', 'Matthew', 'Anthony', 'Mark', 'Donald', 'Steven', 'Paul', 'Andrew', 'Joshua', 'Kenneth', 'Kevin', 'Brian', 'George', 'Timothy', 'Ronald', 'Edward', 'Jason', 'Jeffrey', 'Gary', 'Ryan', 'Nicholas', 'Eric', 'Stephen', 'Jacob', 'Larry', 'Jonathan'];
+  const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Miller', 'Davis', 'Garcia', 'Rodriguez', 'Wilson', 'Martinez', 'Anderson', 'Taylor', 'Thomas', 'Hernandez', 'Moore', 'Martin', 'Jackson', 'Thompson', 'White', 'Lopez', 'Lee', 'Gonzalez', 'Harris', 'Clark', 'Lewis', 'Robinson', 'Walker', 'Perez', 'Hall', 'Young', 'Allen', 'Sanchez', 'Wright', 'King'];
+
   while (equipment.length < 47) {
     const type = types[Math.floor(Math.random() * types.length)];
     const id = `${prefixes[type]}${idCounter++}`;
@@ -146,7 +150,18 @@ const getSeedData = () => {
     if (rand < 0.7) {
       status = 'Active';
       siteId = sites[Math.floor(Math.random() * sites.length)].id;
-      operatorId = operators[Math.floor(Math.random() * operators.length)].id;
+      
+      // Generate a unique operator for this active machine
+      const opId = `OP${operatorCounter++}`;
+      const fName = firstNames[Math.floor(Math.random() * firstNames.length)];
+      const lName = lastNames[Math.floor(Math.random() * lastNames.length)];
+      operators.push({
+        id: opId,
+        name: `${fName} ${lName}`,
+        certification: `${type} Level ${Math.floor(Math.random() * 2) + 1}`
+      });
+      operatorId = opId;
+
       checkInDate = '2026-07-20';
       checkOutDate = `2026-08-${Math.floor(Math.random() * 20) + 10}`;
       engineHoursPerDay = parseFloat((Math.random() * 6 + 2).toFixed(1)); // 2 - 8 hrs
@@ -160,7 +175,18 @@ const getSeedData = () => {
       // Overdue or maintenance
       status = 'Active';
       siteId = sites[Math.floor(Math.random() * sites.length)].id;
-      operatorId = operators[Math.floor(Math.random() * operators.length)].id;
+      
+      // Generate a unique operator for this overdue active machine
+      const opId = `OP${operatorCounter++}`;
+      const fName = firstNames[Math.floor(Math.random() * firstNames.length)];
+      const lName = lastNames[Math.floor(Math.random() * lastNames.length)];
+      operators.push({
+        id: opId,
+        name: `${fName} ${lName}`,
+        certification: `${type} Level ${Math.floor(Math.random() * 2) + 1}`
+      });
+      operatorId = opId;
+
       checkInDate = '2026-07-01';
       checkOutDate = `2026-07-${Math.floor(Math.random() * 5) + 20}`; // due before July 30
       engineHoursPerDay = parseFloat((Math.random() * 4 + 1).toFixed(1));
