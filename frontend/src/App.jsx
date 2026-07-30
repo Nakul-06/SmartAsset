@@ -8,7 +8,8 @@ import {
   AlertTriangle, 
   Sparkles, 
   Activity, 
-  Server
+  Server,
+  LogOut
 } from 'lucide-react';
 
 // Import Pages
@@ -19,6 +20,8 @@ import CheckInOut from './pages/CheckInOut';
 import Analytics from './pages/Analytics';
 import Alerts from './pages/Alerts';
 import AIInsights from './pages/AIInsights';
+import OperatorPortal from './pages/OperatorPortal';
+import Login from './components/Login';
 
 const BACKEND_URL = 'http://localhost:5001/api';
 
@@ -32,6 +35,8 @@ function App() {
   const [reallocations, setReallocations] = useState([]);
   const [selectedAssetId, setSelectedAssetId] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(new Date());
+
+  const [user, setUser] = useState(null); // auth state (null = Login Page)
 
   // Function to fetch data from the backend
   const fetchData = async () => {
@@ -154,6 +159,22 @@ function App() {
         return <Dashboard equipment={equipment} analytics={analytics} alerts={alerts} navigateToTab={navigateToTab} />;
     }
   };
+
+  if (!user) {
+    return <Login onLogin={setUser} />;
+  }
+
+  if (user.role === 'operator') {
+    return (
+      <OperatorPortal 
+        user={user} 
+        equipment={equipment} 
+        sites={sites} 
+        fetchData={fetchData} 
+        onLogout={() => setUser(null)} 
+      />
+    );
+  }
 
   return (
     <div className="flex h-screen bg-cat-dark font-sans overflow-hidden">
@@ -288,6 +309,14 @@ function App() {
             </span>
             <span>{lastUpdated.toLocaleTimeString()}</span>
           </div>
+
+          <button 
+            onClick={() => setUser(null)}
+            className="w-full mt-1 bg-cat-dark hover:bg-cat-border border border-cat-border text-cat-gray hover:text-cat-text py-2 rounded-lg text-[10px] font-bold uppercase transition-all duration-150 flex items-center justify-center gap-1.5"
+          >
+            <LogOut size={12} />
+            <span>Log Out</span>
+          </button>
         </div>
       </aside>
 
