@@ -22,7 +22,8 @@ export default function EquipmentList({
   selectedAssetId, 
   setSelectedAssetId,
   reallocations,
-  fetchData 
+  fetchData,
+  navigateToTab
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
@@ -357,7 +358,7 @@ export default function EquipmentList({
               </button>
             ) : (
               <button
-                onClick={() => setSelectedAssetId(selectedAsset.equipmentId)} // Navigate tab in App.jsx sets selected asset
+                onClick={() => navigateToTab('checkout', selectedAsset.equipmentId)} // Redirects to Check In/Out tab with this asset selected
                 className="flex-1 bg-cat-yellow hover:bg-yellow-500 text-cat-dark font-extrabold py-2.5 rounded-lg text-xs transition-all duration-200 flex items-center justify-center gap-2"
               >
                 <span>Check Out (Deploy)</span>

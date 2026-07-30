@@ -106,6 +106,7 @@ function App() {
             setSelectedAssetId={setSelectedAssetId}
             reallocations={reallocations}
             fetchData={fetchData}
+            navigateToTab={navigateToTab}
           />
         );
       case 'map':
