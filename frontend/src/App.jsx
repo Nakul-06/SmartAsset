@@ -34,6 +34,7 @@ function App() {
   const [analytics, setAnalytics] = useState(null);
   const [reallocations, setReallocations] = useState([]);
   const [selectedAssetId, setSelectedAssetId] = useState(null);
+  const [forcedActionType, setForcedActionType] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(new Date());
 
   const [user, setUser] = useState(null); // auth state (null = Login Page)
@@ -91,13 +92,14 @@ function App() {
   }, []);
 
   // Helper to change tab and reset selected asset details
-  const navigateToTab = (tab, assetId = null) => {
+  const navigateToTab = (tab, assetId = null, forcedAction = null) => {
     setActiveTab(tab);
     if (assetId) {
       setSelectedAssetId(assetId);
     } else {
       setSelectedAssetId(null);
     }
+    setForcedActionType(forcedAction);
     fetchData();
   };
 
@@ -141,7 +143,11 @@ function App() {
             operators={operators} 
             fetchData={fetchData}
             initialAssetId={selectedAssetId}
-            clearParentAssetId={() => setSelectedAssetId(null)}
+            forcedActionType={forcedActionType}
+            clearParentAssetId={() => {
+              setSelectedAssetId(null);
+              setForcedActionType(null);
+            }}
           />
         );
       case 'analytics':

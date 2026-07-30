@@ -103,7 +103,7 @@ export default function Alerts({ alerts, navigateToTab }) {
                             <Mail size={12} /> Contact Site
                           </button>
                           <button 
-                            onClick={() => navigateToTab('checkout', alert.equipmentId)}
+                            onClick={() => navigateToTab('checkout', alert.equipmentId, 'checkout')}
                             className="bg-cat-dark border border-cat-border hover:border-cat-yellow text-cat-text font-bold py-2 px-4 rounded-lg text-[10px] uppercase transition-all flex items-center gap-1.5"
                           >
                             <Plus size={12} /> Extend Lease
@@ -111,7 +111,7 @@ export default function Alerts({ alerts, navigateToTab }) {
                         </>
                       ) : (
                         <button 
-                          onClick={() => navigateToTab('checkout', alert.equipmentId)}
+                          onClick={() => navigateToTab('checkout', alert.equipmentId, 'checkout')}
                           className="bg-amber-500 hover:bg-amber-600 text-cat-dark font-extrabold py-2 px-4 rounded-lg text-[10px] uppercase transition-colors"
                         >
                           Review Extension

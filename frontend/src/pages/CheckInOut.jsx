@@ -10,7 +10,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 
-export default function CheckInOut({ equipment, sites, operators, fetchData, initialAssetId, clearParentAssetId }) {
+export default function CheckInOut({ equipment, sites, operators, fetchData, initialAssetId, forcedActionType, clearParentAssetId }) {
   const [selectedAssetId, setSelectedAssetId] = useState(initialAssetId || '');
   const [actionType, setActionType] = useState('checkout'); // 'checkout' or 'checkin'
   
@@ -29,12 +29,16 @@ export default function CheckInOut({ equipment, sites, operators, fetchData, ini
   useEffect(() => {
     if (initialAssetId) {
       setSelectedAssetId(initialAssetId);
-      const asset = equipment.find(e => e.equipmentId === initialAssetId);
-      if (asset) {
-        setActionType(asset.status === 'Active' ? 'checkin' : 'checkout');
+      if (forcedActionType) {
+        setActionType(forcedActionType);
+      } else {
+        const asset = equipment.find(e => e.equipmentId === initialAssetId);
+        if (asset) {
+          setActionType(asset.status === 'Active' ? 'checkin' : 'checkout');
+        }
       }
     }
-  }, [initialAssetId, equipment]);
+  }, [initialAssetId, forcedActionType, equipment]);
 
   const selectedAsset = equipment.find(e => e.equipmentId === selectedAssetId);
 
