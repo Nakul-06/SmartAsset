@@ -11,7 +11,8 @@ import {
   ArrowRight,
   X,
   AlertTriangle,
-  RefreshCw
+  RefreshCw,
+  Truck
 } from 'lucide-react';
 
 export default function EquipmentList({ 
