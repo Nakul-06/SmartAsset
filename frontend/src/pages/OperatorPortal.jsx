@@ -11,7 +11,9 @@ import {
   QrCode,
   LogOut,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  Truck,
+  Activity
 } from 'lucide-react';
 
 export default function OperatorPortal({ user, equipment, sites, fetchData, onLogout }) {
