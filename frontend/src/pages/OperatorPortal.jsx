@@ -21,6 +21,12 @@ export default function OperatorPortal({ user, equipment, sites, fetchData, onLo
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState(null);
 
+  // Manual telematics entry state
+  const [logEngineHours, setLogEngineHours] = useState('');
+  const [logIdleHours, setLogIdleHours] = useState('');
+  const [logFuelLevel, setLogFuelLevel] = useState('');
+  const [logSubmitting, setLogSubmitting] = useState(false);
+
   // Map refs
   const mapRef = useRef(null);
   const leafletMapInstance = useRef(null);
@@ -86,6 +92,45 @@ export default function OperatorPortal({ user, equipment, sites, fetchData, onLo
       alert('Connection error');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Sync telematics form inputs once when a machine loads
+  useEffect(() => {
+    if (myAsset) {
+      setLogEngineHours(myAsset.engineHoursPerDay.toFixed(1));
+      setLogIdleHours(myAsset.idleHoursPerDay.toFixed(1));
+      setLogFuelLevel(Math.round(myAsset.fuelLevel).toString());
+    }
+  }, [myAsset?.equipmentId]);
+
+  // Handle telemetry logging submit
+  const handleLogTelemetry = async (e) => {
+    e.preventDefault();
+    if (!myAsset) return;
+
+    setLogSubmitting(true);
+    try {
+      const response = await fetch(`http://localhost:5001/api/equipment/${myAsset.equipmentId}/log`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          engineHours: parseFloat(logEngineHours),
+          idleHours: parseFloat(logIdleHours),
+          fuelLevel: parseFloat(logFuelLevel)
+        })
+      });
+      if (response.ok) {
+        setSuccessMsg(`✓ Daily usage telemetry logged successfully for ${myAsset.equipmentId}.`);
+        await fetchData();
+      } else {
+        alert('Failed to log daily telemetry.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error connecting to backend.');
+    } finally {
+      setLogSubmitting(false);
     }
   };
 
@@ -311,6 +356,63 @@ export default function OperatorPortal({ user, equipment, sites, fetchData, onLo
                   <CheckCircle size={14} />
                   <span>Return Equipment</span>
                 </button>
+              </div>
+
+              {/* Manual Usage Log Card */}
+              <div className="bg-cat-card border border-cat-border p-6 rounded-xl space-y-4">
+                <h4 className="font-bold text-xs uppercase text-cat-text flex items-center gap-2">
+                  <Clock size={14} className="text-cat-yellow" />
+                  Report Daily Telemetry
+                </h4>
+                
+                <form onSubmit={handleLogTelemetry} className="space-y-4 text-xs">
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-cat-gray uppercase font-semibold">Engine Hours worked today</label>
+                    <input 
+                      type="number" 
+                      step="0.1" 
+                      min="0"
+                      value={logEngineHours}
+                      onChange={e => setLogEngineHours(e.target.value)}
+                      required
+                      className="w-full bg-cat-dark border border-cat-border rounded-lg px-3 py-2 text-xs text-cat-text focus:outline-none focus:border-cat-yellow"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-cat-gray uppercase font-semibold">Idle Hours today</label>
+                    <input 
+                      type="number" 
+                      step="0.1" 
+                      min="0"
+                      value={logIdleHours}
+                      onChange={e => setLogIdleHours(e.target.value)}
+                      required
+                      className="w-full bg-cat-dark border border-cat-border rounded-lg px-3 py-2 text-xs text-cat-text focus:outline-none focus:border-cat-yellow"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-cat-gray uppercase font-semibold">Fuel Level (%)</label>
+                    <input 
+                      type="number" 
+                      min="0"
+                      max="100"
+                      value={logFuelLevel}
+                      onChange={e => setLogFuelLevel(e.target.value)}
+                      required
+                      className="w-full bg-cat-dark border border-cat-border rounded-lg px-3 py-2 text-xs text-cat-text focus:outline-none focus:border-cat-yellow"
+                    />
+                  </div>
+
+                  <button 
+                    type="submit"
+                    disabled={logSubmitting}
+                    className="w-full bg-cat-yellow hover:bg-yellow-500 disabled:bg-cat-border text-cat-dark font-extrabold py-2.5 rounded-lg text-xs uppercase tracking-wider transition-colors"
+                  >
+                    {logSubmitting ? 'Logging...' : 'Log Operational Telemetry'}
+                  </button>
+                </form>
               </div>
 
             </div>

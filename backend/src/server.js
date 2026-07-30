@@ -154,6 +154,24 @@ app.post('/api/equipment/:id/checkin', (req, res) => {
   res.json({ message: 'Equipment checked in successfully', equipment: processAsset(asset) });
 });
 
+// POST /api/equipment/:id/log
+app.post('/api/equipment/:id/log', (req, res) => {
+  const asset = db.getEquipmentById(req.params.id);
+  if (!asset) {
+    return res.status(404).json({ error: 'Equipment not found' });
+  }
+
+  const { engineHours, idleHours, fuelLevel } = req.body;
+
+  if (engineHours !== undefined) asset.engineHoursPerDay = parseFloat(engineHours);
+  if (idleHours !== undefined) asset.idleHoursPerDay = parseFloat(idleHours);
+  if (fuelLevel !== undefined) asset.fuelLevel = parseFloat(fuelLevel);
+  asset.lastUpdated = new Date().toISOString();
+
+  db.saveEquipment(asset);
+  res.json({ message: 'Telemetry logged successfully', equipment: processAsset(asset) });
+});
+
 // GET /api/sites
 app.get('/api/sites', (req, res) => {
   res.json(db.getSites());
