@@ -129,9 +129,16 @@ const getSeedData = () => {
   };
 
   let idCounter = 1008;
-  let operatorCounter = 300;
-  const firstNames = ['David', 'James', 'Robert', 'Michael', 'William', 'Thomas', 'Richard', 'Joseph', 'Charles', 'Daniel', 'Matthew', 'Anthony', 'Mark', 'Donald', 'Steven', 'Paul', 'Andrew', 'Joshua', 'Kenneth', 'Kevin', 'Brian', 'George', 'Timothy', 'Ronald', 'Edward', 'Jason', 'Jeffrey', 'Gary', 'Ryan', 'Nicholas', 'Eric', 'Stephen', 'Jacob', 'Larry', 'Jonathan'];
-  const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Miller', 'Davis', 'Garcia', 'Rodriguez', 'Wilson', 'Martinez', 'Anderson', 'Taylor', 'Thomas', 'Hernandez', 'Moore', 'Martin', 'Jackson', 'Thompson', 'White', 'Lopez', 'Lee', 'Gonzalez', 'Harris', 'Clark', 'Lewis', 'Robinson', 'Walker', 'Perez', 'Hall', 'Young', 'Allen', 'Sanchez', 'Wright', 'King'];
+  const assignedOperators = new Set(['OP101', 'OP203', 'OP104', 'OP103']);
+
+  const getFreeOperator = () => {
+    const freeOp = operators.find(op => !assignedOperators.has(op.id));
+    if (freeOp) {
+      assignedOperators.add(freeOp.id);
+      return freeOp.id;
+    }
+    return null;
+  };
 
   while (equipment.length < 47) {
     const type = types[Math.floor(Math.random() * types.length)];
@@ -153,20 +160,30 @@ const getSeedData = () => {
     let lng = 80.2100;
 
     if (rand < 0.7) {
-      status = 'Active';
-      siteId = sites[Math.floor(Math.random() * sites.length)].id;
-      
-      const site = sites.find(s => s.id === siteId);
-      lat = site.location.latitude + (Math.random() - 0.5) * 0.008;
-      lng = site.location.longitude + (Math.random() - 0.5) * 0.008;
+      const freeOpId = getFreeOperator();
+      if (freeOpId) {
+        status = 'Active';
+        siteId = sites[Math.floor(Math.random() * sites.length)].id;
+        
+        const site = sites.find(s => s.id === siteId);
+        lat = site.location.latitude + (Math.random() - 0.5) * 0.008;
+        lng = site.location.longitude + (Math.random() - 0.5) * 0.008;
 
-      // Assign one of the 10 seeded operators
-      operatorId = operators[Math.floor(Math.random() * operators.length)].id;
+        operatorId = freeOpId;
 
-      checkInDate = '2026-07-20';
-      checkOutDate = `2026-08-${Math.floor(Math.random() * 20) + 10}`;
-      engineHoursPerDay = parseFloat((Math.random() * 6 + 2).toFixed(1)); // 2 - 8 hrs
-      idleHoursPerDay = parseFloat((Math.random() * 4 + 1).toFixed(1)); // 1 - 5 hrs
+        checkInDate = '2026-07-20';
+        checkOutDate = `2026-08-${Math.floor(Math.random() * 20) + 10}`;
+        engineHoursPerDay = parseFloat((Math.random() * 6 + 2).toFixed(1)); // 2 - 8 hrs
+        idleHoursPerDay = parseFloat((Math.random() * 4 + 1).toFixed(1)); // 1 - 5 hrs
+      } else {
+        // No free operators, make this machine Unassigned!
+        status = 'Unassigned';
+        engineHoursPerDay = 0;
+        idleHoursPerDay = parseFloat((Math.random() * 2).toFixed(1)); // low idle when unassigned
+        fuelLevel = Math.floor(Math.random() * 40) + 10;
+        lat = 13.0500 + (Math.random() - 0.5) * 0.008;
+        lng = 80.2100 + (Math.random() - 0.5) * 0.008;
+      }
     } else if (rand < 0.9) {
       status = 'Unassigned';
       engineHoursPerDay = 0;
@@ -176,20 +193,30 @@ const getSeedData = () => {
       lng = 80.2100 + (Math.random() - 0.5) * 0.008;
     } else {
       // Overdue or maintenance
-      status = 'Active';
-      siteId = sites[Math.floor(Math.random() * sites.length)].id;
+      const freeOpId = getFreeOperator();
+      if (freeOpId) {
+        status = 'Active';
+        siteId = sites[Math.floor(Math.random() * sites.length)].id;
 
-      const site = sites.find(s => s.id === siteId);
-      lat = site.location.latitude + (Math.random() - 0.5) * 0.008;
-      lng = site.location.longitude + (Math.random() - 0.5) * 0.008;
-      
-      // Assign one of the 10 seeded operators
-      operatorId = operators[Math.floor(Math.random() * operators.length)].id;
+        const site = sites.find(s => s.id === siteId);
+        lat = site.location.latitude + (Math.random() - 0.5) * 0.008;
+        lng = site.location.longitude + (Math.random() - 0.5) * 0.008;
+        
+        operatorId = freeOpId;
 
-      checkInDate = '2026-07-01';
-      checkOutDate = `2026-07-${Math.floor(Math.random() * 5) + 20}`; // due before July 30
-      engineHoursPerDay = parseFloat((Math.random() * 4 + 1).toFixed(1));
-      idleHoursPerDay = parseFloat((Math.random() * 6 + 2).toFixed(1));
+        checkInDate = '2026-07-01';
+        checkOutDate = `2026-07-${Math.floor(Math.random() * 5) + 20}`; // due before July 30
+        engineHoursPerDay = parseFloat((Math.random() * 4 + 1).toFixed(1));
+        idleHoursPerDay = parseFloat((Math.random() * 6 + 2).toFixed(1));
+      } else {
+        // No free operators, make this machine Unassigned!
+        status = 'Unassigned';
+        engineHoursPerDay = 0;
+        idleHoursPerDay = parseFloat((Math.random() * 2).toFixed(1)); // low idle when unassigned
+        fuelLevel = Math.floor(Math.random() * 40) + 10;
+        lat = 13.0500 + (Math.random() - 0.5) * 0.008;
+        lng = 80.2100 + (Math.random() - 0.5) * 0.008;
+      }
     }
 
     equipment.push({
