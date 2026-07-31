@@ -144,13 +144,17 @@ const getSeedData = () => {
     let engineHoursPerDay = 0;
     let idleHoursPerDay = 0;
     let fuelLevel = Math.floor(Math.random() * 60) + 30; // 30% - 90%
-    let lat = 13.0827 + (Math.random() - 0.5) * 0.15;
-    let lng = 80.2707 + (Math.random() - 0.5) * 0.15;
+    let lat = 13.0500;
+    let lng = 80.2100;
 
     if (rand < 0.7) {
       status = 'Active';
       siteId = sites[Math.floor(Math.random() * sites.length)].id;
       
+      const site = sites.find(s => s.id === siteId);
+      lat = site.location.latitude + (Math.random() - 0.5) * 0.008;
+      lng = site.location.longitude + (Math.random() - 0.5) * 0.008;
+
       // Generate a unique operator for this active machine
       const opId = `OP${operatorCounter++}`;
       const fName = firstNames[Math.floor(Math.random() * firstNames.length)];
@@ -171,10 +175,16 @@ const getSeedData = () => {
       engineHoursPerDay = 0;
       idleHoursPerDay = parseFloat((Math.random() * 2).toFixed(1)); // low idle when unassigned
       fuelLevel = Math.floor(Math.random() * 40) + 10;
+      lat = 13.0500 + (Math.random() - 0.5) * 0.008;
+      lng = 80.2100 + (Math.random() - 0.5) * 0.008;
     } else {
       // Overdue or maintenance
       status = 'Active';
       siteId = sites[Math.floor(Math.random() * sites.length)].id;
+
+      const site = sites.find(s => s.id === siteId);
+      lat = site.location.latitude + (Math.random() - 0.5) * 0.008;
+      lng = site.location.longitude + (Math.random() - 0.5) * 0.008;
       
       // Generate a unique operator for this overdue active machine
       const opId = `OP${operatorCounter++}`;

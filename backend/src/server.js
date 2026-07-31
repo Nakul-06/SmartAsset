@@ -128,6 +128,14 @@ app.post('/api/equipment/:id/checkout', (req, res) => {
   asset.status = 'Active';
   asset.engineHoursPerDay = 1.0; // Reset with some initial baseline hours
   asset.idleHoursPerDay = 1.0;
+
+  // Snap coordinates to target site to avoid ocean placements
+  const targetSiteObj = db.getSites().find(s => s.id === siteId);
+  if (targetSiteObj && asset.location) {
+    asset.location.latitude = targetSiteObj.location.latitude + (Math.random() - 0.5) * 0.004;
+    asset.location.longitude = targetSiteObj.location.longitude + (Math.random() - 0.5) * 0.004;
+  }
+
   asset.lastUpdated = new Date().toISOString();
 
   db.saveEquipment(asset);
@@ -148,6 +156,13 @@ app.post('/api/equipment/:id/checkin', (req, res) => {
   asset.status = 'Unassigned';
   asset.engineHoursPerDay = 0;
   asset.idleHoursPerDay = 0;
+
+  // Snap coordinates back to main Equipment Yard to avoid ocean placements
+  if (asset.location) {
+    asset.location.latitude = 13.0500 + (Math.random() - 0.5) * 0.005;
+    asset.location.longitude = 80.2100 + (Math.random() - 0.5) * 0.005;
+  }
+
   asset.lastUpdated = new Date().toISOString();
 
   db.saveEquipment(asset);
