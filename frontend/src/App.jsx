@@ -37,7 +37,10 @@ function App() {
   const [forcedActionType, setForcedActionType] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(new Date());
 
-  const [user, setUser] = useState(null); // auth state (null = Login Page)
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('smart_rental_user');
+    return saved ? JSON.parse(saved) : null;
+  });
 
   // Function to fetch data from the backend
   const fetchData = async () => {
@@ -74,11 +77,13 @@ function App() {
 
   const handleLogin = (userProfile) => {
     setUser(userProfile);
+    localStorage.setItem('smart_rental_user', JSON.stringify(userProfile));
     fetchData();
   };
 
   const handleLogout = () => {
     setUser(null);
+    localStorage.removeItem('smart_rental_user');
     fetchData();
   };
 
