@@ -31,20 +31,20 @@ const startTelemetrySimulation = () => {
       if (machine.fuelLevel <= 5) {
         machine.fuelLevel = 100; // Simulated refuel!
       }
-
+ 
       // 2. Simulate Hours Accumulation
       // Depending on their utilization profile, add to engine hours or idle hours
       // We will look at their current engineHoursPerDay / idleHoursPerDay ratio
       const totalHours = machine.engineHoursPerDay + machine.idleHoursPerDay;
       const utilizationRatio = totalHours > 0 ? machine.engineHoursPerDay / totalHours : 0.5;
-
+ 
       const increment = 0.05; // 3 minutes of work simulated per tick
       if (Math.random() < utilizationRatio) {
         machine.engineHoursPerDay = parseFloat((machine.engineHoursPerDay + increment).toFixed(2));
       } else {
         machine.idleHoursPerDay = parseFloat((machine.idleHoursPerDay + increment).toFixed(2));
       }
-
+ 
       // 3. Simulate GPS Drift (work site movement)
       // Drift slightly: around 0.0001 to 0.0003 degrees (~10-30 meters)
       if (machine.location) {
@@ -53,12 +53,13 @@ const startTelemetrySimulation = () => {
         machine.location.latitude = parseFloat((machine.location.latitude + latDrift).toFixed(6));
         machine.location.longitude = parseFloat((machine.location.longitude + lngDrift).toFixed(6));
       }
-
+ 
       // 4. Set dynamic lastUpdated timestamp
       machine.lastUpdated = new Date().toISOString();
-
-      db.saveEquipment(machine);
     });
+ 
+    // Write to disk exactly once per tick to prevent EBUSY/file-lock crashes
+    db.saveDb();
 
   }, 3000); // every 3 seconds
 };
