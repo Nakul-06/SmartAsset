@@ -15,6 +15,8 @@ import {
   Truck
 } from 'lucide-react';
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+
 export default function EquipmentList({ 
   equipment, 
   sites, 
@@ -58,7 +60,7 @@ export default function EquipmentList({
   // Handle equipment return (check in)
   const handleCheckIn = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5001/api/equipment/${id}/checkin`, {
+      const response = await fetch(`${BACKEND_URL}/equipment/${id}/checkin`, {
         method: 'POST',
       });
       if (response.ok) {

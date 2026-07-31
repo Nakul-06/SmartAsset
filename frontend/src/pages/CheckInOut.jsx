@@ -10,6 +10,8 @@ import {
   ArrowRight
 } from 'lucide-react';
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+
 export default function CheckInOut({ equipment, sites, operators, fetchData, initialAssetId, forcedActionType, clearParentAssetId }) {
   const [selectedAssetId, setSelectedAssetId] = useState(initialAssetId || '');
   const [actionType, setActionType] = useState('checkout'); // 'checkout' or 'checkin'
@@ -79,7 +81,7 @@ export default function CheckInOut({ equipment, sites, operators, fetchData, ini
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`http://localhost:5001/api/equipment/${selectedAssetId}/checkout`, {
+      const response = await fetch(`${BACKEND_URL}/equipment/${selectedAssetId}/checkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -120,7 +122,7 @@ export default function CheckInOut({ equipment, sites, operators, fetchData, ini
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`http://localhost:5001/api/equipment/${selectedAssetId}/checkin`, {
+      const response = await fetch(`${BACKEND_URL}/equipment/${selectedAssetId}/checkin`, {
         method: 'POST'
       });
 

@@ -10,6 +10,8 @@ import {
   Settings
 } from 'lucide-react';
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+
 export default function AIInsights({ reallocations, sites, equipment, navigateToTab }) {
   const [selectedSite, setSelectedSite] = useState('S003');
   const [selectedType, setSelectedType] = useState('Excavator');
@@ -22,7 +24,7 @@ export default function AIInsights({ reallocations, sites, equipment, navigateTo
     setForecastResult(null);
 
     try {
-      const response = await fetch('http://localhost:5001/api/forecast', {
+      const response = await fetch(`${BACKEND_URL}/forecast`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -51,7 +53,7 @@ export default function AIInsights({ reallocations, sites, equipment, navigateTo
     if (!confirmMove) return;
 
     try {
-      const response = await fetch(`http://localhost:5001/api/equipment/${rec.equipmentId}/checkout`, {
+      const response = await fetch(`${BACKEND_URL}/equipment/${rec.equipmentId}/checkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

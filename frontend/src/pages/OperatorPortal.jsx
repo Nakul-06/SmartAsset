@@ -16,6 +16,8 @@ import {
   Activity
 } from 'lucide-react';
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+
 export default function OperatorPortal({ user, equipment, sites, fetchData, onLogout }) {
   const [destinationSite, setDestinationSite] = useState('');
   const [selectedAssetId, setSelectedAssetId] = useState('');
@@ -83,7 +85,7 @@ export default function OperatorPortal({ user, equipment, sites, fetchData, onLo
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`http://localhost:5001/api/equipment/${myAsset.equipmentId}/checkin`, {
+      const response = await fetch(`${BACKEND_URL}/equipment/${myAsset.equipmentId}/checkin`, {
         method: 'POST'
       });
       if (response.ok) {
@@ -112,7 +114,7 @@ export default function OperatorPortal({ user, equipment, sites, fetchData, onLo
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`http://localhost:5001/api/equipment/${selectedAssetId}/checkout`, {
+      const response = await fetch(`${BACKEND_URL}/equipment/${selectedAssetId}/checkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -136,8 +138,12 @@ export default function OperatorPortal({ user, equipment, sites, fetchData, onLo
     }
   };
 
-  const isOverdue = myAsset?.status === 'Active' && myAsset?.checkOutDate && new Date(myAsset.checkOutDate) < new Date('2026-07-30');
-  const isLowUtil = myAsset?.status === 'Active' && myAsset?.utilization < 20;
+  const isOverdue = myAsset && myAsset.status === 'Active' && myAsset.checkOutDate 
+    ? new Date(myAsset.checkOutDate) < new Date('2026-07-30') 
+    : false;
+  const isLowUtil = myAsset && myAsset.status === 'Active' 
+    ? myAsset.utilization < 20 
+    : false;
 
   return (
     <div className="min-h-screen bg-cat-dark font-sans text-cat-text flex flex-col">
