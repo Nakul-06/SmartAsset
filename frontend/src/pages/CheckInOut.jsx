@@ -24,6 +24,7 @@ export default function CheckInOut({ equipment, sites, operators, fetchData, ini
   const [expectedReturn, setExpectedReturn] = useState('2026-08-15');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Sync initial asset if passed from parent
   useEffect(() => {
@@ -41,6 +42,11 @@ export default function CheckInOut({ equipment, sites, operators, fetchData, ini
   }, [initialAssetId, forcedActionType, equipment]);
 
   const selectedAsset = equipment.find(e => e.equipmentId === selectedAssetId);
+  const filteredEquipment = equipment.filter(e => 
+    e.equipmentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    e.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    e.type.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Simulate scanning action
   const handleStartScan = () => {
@@ -240,6 +246,16 @@ export default function CheckInOut({ equipment, sites, operators, fetchData, ini
             {/* 1. Equipment Selection */}
             <div className="space-y-1.5">
               <label className="text-xs text-cat-gray font-semibold">Select Equipment</label>
+              
+              {/* Autocomplete Search input */}
+              <input
+                type="text"
+                placeholder="🔍 Type Machine ID, Name, or Category to filter..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="w-full bg-cat-dark border border-cat-border rounded-lg px-3 py-2 text-xs text-cat-text focus:outline-none focus:border-cat-yellow mb-2"
+              />
+
               <select
                 value={selectedAssetId}
                 onChange={e => setSelectedAssetId(e.target.value)}
@@ -248,12 +264,12 @@ export default function CheckInOut({ equipment, sites, operators, fetchData, ini
                 <option value="">-- Choose Equipment --</option>
                 {/* Group dropdown by availability */}
                 <optgroup label="Available (Unassigned)">
-                  {equipment.filter(e => e.status === 'Unassigned').map(e => (
+                  {filteredEquipment.filter(e => e.status === 'Unassigned').map(e => (
                     <option key={e.equipmentId} value={e.equipmentId}>{e.equipmentId} - {e.name} ({e.type})</option>
                   ))}
                 </optgroup>
                 <optgroup label="Deployed (Active)">
-                  {equipment.filter(e => e.status === 'Active').map(e => (
+                  {filteredEquipment.filter(e => e.status === 'Active').map(e => (
                     <option key={e.equipmentId} value={e.equipmentId}>{e.equipmentId} - {e.name} ({e.type})</option>
                   ))}
                 </optgroup>

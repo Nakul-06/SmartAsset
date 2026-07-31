@@ -23,6 +23,7 @@ export default function OperatorPortal({ user, equipment, sites, fetchData, onLo
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState(null);
   const [operatorTab, setOperatorTab] = useState('lease');
+  const [gallerySearchTerm, setGallerySearchTerm] = useState('');
 
   // Map refs
   const mapRef = useRef(null);
@@ -32,6 +33,15 @@ export default function OperatorPortal({ user, equipment, sites, fetchData, onLo
   // Find the operator's current active equipment
   // It could be active and assigned to their operatorId
   const myAsset = equipment.find(e => e.operatorId === user.id && e.status === 'Active');
+
+  // Filter unassigned machines by search term
+  const filteredUnassigned = equipment
+    .filter(e => e.status === 'Unassigned')
+    .filter(e => 
+      e.equipmentId.toLowerCase().includes(gallerySearchTerm.toLowerCase()) ||
+      e.name.toLowerCase().includes(gallerySearchTerm.toLowerCase()) ||
+      e.type.toLowerCase().includes(gallerySearchTerm.toLowerCase())
+    );
 
   // Load Map when asset exists and coordinates are available
   useEffect(() => {
@@ -190,16 +200,26 @@ export default function OperatorPortal({ user, equipment, sites, fetchData, onLo
 
         {operatorTab === 'gallery' ? (
           /* AVAILABLE FLEET GALLERY */
-          <div className="space-y-6">
-            <div className="space-y-1">
-              <h3 className="text-lg font-extrabold text-cat-text uppercase">Available Fleet Gallery</h3>
-              <p className="text-xs text-cat-gray">Browse unassigned heavy equipment in the yard ready for lease deployment.</p>
+          <div className="space-y-6 animate-fadeIn">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <h3 className="text-lg font-extrabold text-cat-text uppercase">Available Fleet Gallery</h3>
+                <p className="text-xs text-cat-gray">Browse unassigned heavy equipment in the yard ready for lease deployment.</p>
+              </div>
+              
+              {/* Search input in gallery view */}
+              <input
+                type="text"
+                placeholder="🔍 Search available machines..."
+                value={gallerySearchTerm}
+                onChange={e => setGallerySearchTerm(e.target.value)}
+                className="w-full md:w-80 bg-cat-card border border-cat-border rounded-xl px-4 py-2.5 text-xs text-cat-text focus:outline-none focus:border-cat-yellow"
+              />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">
-              {equipment.filter(e => e.status === 'Unassigned').length > 0 ? (
-                equipment
-                  .filter(e => e.status === 'Unassigned')
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredUnassigned.length > 0 ? (
+                filteredUnassigned
                   .map(asset => {
                     let MachineIcon = HardHat;
                     if (asset.type === 'Excavator') MachineIcon = Truck;
@@ -437,6 +457,16 @@ export default function OperatorPortal({ user, equipment, sites, fetchData, onLo
               {/* Select Equipment dropdown */}
               <div className="space-y-1.5">
                 <label className="text-xs text-cat-gray font-semibold">Select Available Machine</label>
+                
+                {/* Search bar above dropdown */}
+                <input
+                  type="text"
+                  placeholder="🔍 Type to filter available machines..."
+                  value={gallerySearchTerm}
+                  onChange={e => setGallerySearchTerm(e.target.value)}
+                  className="w-full bg-cat-dark border border-cat-border rounded-lg px-3 py-2 text-xs text-cat-text focus:outline-none focus:border-cat-yellow mb-2"
+                />
+
                 <select
                   value={selectedAssetId}
                   onChange={e => setSelectedAssetId(e.target.value)}
@@ -444,13 +474,11 @@ export default function OperatorPortal({ user, equipment, sites, fetchData, onLo
                   className="w-full bg-cat-dark border border-cat-border rounded-lg px-4 py-2.5 text-xs text-cat-text focus:outline-none focus:border-cat-yellow cursor-pointer"
                 >
                   <option value="">-- Choose Machine --</option>
-                  {equipment
-                    .filter(e => e.status === 'Unassigned')
-                    .map(e => (
-                      <option key={e.equipmentId} value={e.equipmentId}>
-                        {e.equipmentId} - {e.name} ({e.type})
-                      </option>
-                    ))}
+                  {filteredUnassigned.map(e => (
+                    <option key={e.equipmentId} value={e.equipmentId}>
+                      {e.equipmentId} - {e.name} ({e.type})
+                    </option>
+                  ))}
                 </select>
               </div>
 
