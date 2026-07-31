@@ -62,10 +62,24 @@ export default function OperatorPortal({ user, equipment, sites, fetchData, onLo
           maxZoom: 19,
         }).addTo(leafletMapInstance.current);
 
-        markerRef.current = L.marker([latitude, longitude]).addTo(leafletMapInstance.current);
+        const customIcon = L.divIcon({
+          className: 'custom-operator-icon',
+          html: `
+            <div class="relative flex items-center justify-center">
+              <span class="absolute inline-flex h-8 w-8 rounded-full opacity-35 animate-ping bg-cat-yellow"></span>
+              <div class="h-4 w-4 rounded-full border-2 border-cat-card flex items-center justify-center text-xs font-bold text-cat-dark bg-cat-yellow">
+              </div>
+            </div>
+          `,
+          iconSize: [32, 32]
+        });
+
+        markerRef.current = L.marker([latitude, longitude], { icon: customIcon }).addTo(leafletMapInstance.current);
       } else {
         leafletMapInstance.current.setView([latitude, longitude], 14);
-        markerRef.current.setLatLng([latitude, longitude]);
+        if (markerRef.current) {
+          markerRef.current.setLatLng([latitude, longitude]);
+        }
       }
     }
 
