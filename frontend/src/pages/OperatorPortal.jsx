@@ -92,6 +92,7 @@ export default function OperatorPortal({ user, equipment, sites, fetchData, onLo
         setSuccessMsg(`✓ ${myAsset.equipmentId} successfully returned to the fleet yard.`);
         setSelectedAssetId('');
         setDestinationSite('');
+        setOperatorTab('gallery');
         await fetchData();
       } else {
         alert('Check-in failed');

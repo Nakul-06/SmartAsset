@@ -19,7 +19,12 @@ const getSeedData = () => {
     { id: 'OP102', name: 'Sarah Connor', certification: 'Crane Master' },
     { id: 'OP103', name: 'Mike Ross', certification: 'Bulldozer Specialist' },
     { id: 'OP104', name: 'Elena Rostova', certification: 'General Heavy Equipment' },
-    { id: 'OP203', name: 'Alex Carter', certification: 'Bulldozer Specialist' }
+    { id: 'OP203', name: 'Alex Carter', certification: 'Bulldozer Specialist' },
+    { id: 'OP105', name: 'David Smith', certification: 'Excavator Level 1' },
+    { id: 'OP106', name: 'James Johnson', certification: 'Grader Specialist' },
+    { id: 'OP107', name: 'Robert Williams', certification: 'Crane Master' },
+    { id: 'OP108', name: 'Michael Brown', certification: 'Bulldozer Specialist' },
+    { id: 'OP109', name: 'William Jones', certification: 'Excavator Level 2' }
   ];
 
   // Specific machines required by user
@@ -155,16 +160,8 @@ const getSeedData = () => {
       lat = site.location.latitude + (Math.random() - 0.5) * 0.008;
       lng = site.location.longitude + (Math.random() - 0.5) * 0.008;
 
-      // Generate a unique operator for this active machine
-      const opId = `OP${operatorCounter++}`;
-      const fName = firstNames[Math.floor(Math.random() * firstNames.length)];
-      const lName = lastNames[Math.floor(Math.random() * lastNames.length)];
-      operators.push({
-        id: opId,
-        name: `${fName} ${lName}`,
-        certification: `${type} Level ${Math.floor(Math.random() * 2) + 1}`
-      });
-      operatorId = opId;
+      // Assign one of the 10 seeded operators
+      operatorId = operators[Math.floor(Math.random() * operators.length)].id;
 
       checkInDate = '2026-07-20';
       checkOutDate = `2026-08-${Math.floor(Math.random() * 20) + 10}`;
@@ -186,16 +183,8 @@ const getSeedData = () => {
       lat = site.location.latitude + (Math.random() - 0.5) * 0.008;
       lng = site.location.longitude + (Math.random() - 0.5) * 0.008;
       
-      // Generate a unique operator for this overdue active machine
-      const opId = `OP${operatorCounter++}`;
-      const fName = firstNames[Math.floor(Math.random() * firstNames.length)];
-      const lName = lastNames[Math.floor(Math.random() * lastNames.length)];
-      operators.push({
-        id: opId,
-        name: `${fName} ${lName}`,
-        certification: `${type} Level ${Math.floor(Math.random() * 2) + 1}`
-      });
-      operatorId = opId;
+      // Assign one of the 10 seeded operators
+      operatorId = operators[Math.floor(Math.random() * operators.length)].id;
 
       checkInDate = '2026-07-01';
       checkOutDate = `2026-07-${Math.floor(Math.random() * 5) + 20}`; // due before July 30
